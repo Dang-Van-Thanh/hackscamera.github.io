@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hack Camera</title>
+  <!-- Import font Bebas Neue từ Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      color: #00ff00;
+      font-family: 'Courier New', Courier, monospace;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #terminal {
+      height: 100vh;
+      width: 100vw;
+      padding: 20px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      background-color: black;
+    }
+
+    #videoContainer {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      display: none;
+      border: 3px solid #00ff00;
+      box-shadow: 0 0 30px #00ff00;
+      background-color: black;
+    }
+
+    #hackVideo {
+      width: 80vw;
+      height: 45vw;
+      max-width: 800px;
+      max-height: 450px;
+      display: block;
+    }
+
+    /* Animation nhấp nháy */
+    @keyframes scaryBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* Glitch overlay CSS trước */
+    #glitchOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url(https://media1.tenor.com/m/kqNqwIahXKkAAAAC/static.gif) center/cover no-repeat black;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: #ff0000;
+      font-size: 8vw;
+      font-family: 'Bebas Neue', sans-serif; /* Sử dụng Bebas Neue */
+      text-shadow: 0 0 20px red, 0 0 50px darkred;
+    }
+
+    #glitchOverlay div {
+      animation: scaryBlink 1s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal">[Đang khởi động hệ thống...]</div>
+
+  <div id="videoContainer">
+    <iframe id="hackVideo" src="https://drive.google.com/file/d/1V6LlHji22bSp_D3fHWWtx4PYmk-Rnaq9/preview" width="640" height="480" allow="autoplay"></iframe>
+  </div>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const videoContainer = document.getElementById('videoContainer');
+    const hackVideo = document.getElementById('hackVideo');
+
+    const ip = () => `${rand(100,255)}.${rand(0,255)}.${rand(0,255)}.${rand(0,255)}`;
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    const cameraCommands = [
+      () => `[+] Phát hiện thiết bị camera tại IP: ${ip()}`,
+      () => `>>> Đang quét cổng RTSP tại ${ip()}...`,
+      () => `[!] Truy cập camera không bảo mật: ${ip()}/liveview`,
+      () => `>>> Gửi payload truy cập camera... Thành công.`,
+      () => `>>> Đang lấy luồng video từ ${ip()}...`,
+      () => `[+] Ghi lại video từ camera ${ip()} - Đã lưu.`,
+      () => `>>> Đăng nhập thành công với tài khoản: admin:admin`,
+      () => `[!] Kết nối livestream camera công cộng tại ${ip()}`
+    ];
+
+    function requestFullScreen() {
+      const docEl = document.documentElement;
+      const request = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+      if (request) request.call(docEl);
+    }
+
+    function startGlitchEffect() {
+      const glitchOverlay = document.createElement('div');
+      glitchOverlay.id = 'glitchOverlay';
+
+      const text = "MÀY LÀ KẺ TIẾP THEO";
+      const textElement = document.createElement('div');
+      textElement.textContent = text;
+      glitchOverlay.appendChild(textElement);
+
+      document.body.appendChild(glitchOverlay);
+    }
+
+    function checkVideoEnd() {
+      setTimeout(() => {
+        videoContainer.style.display = 'none';
+        terminal.style.display = 'none';
+        startGlitchEffect();
+      }, 19000); // Video dài khoảng 16s + buffer
+    }
+
+    document.addEventListener('keydown', function (e) {
+      // Nếu đang glitch
+      if (document.getElementById('glitchOverlay')) {
+        if (e.key === 'Escape') {
+          window.location.href = 'about:blank';
+        }
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        terminal.innerHTML += '\n[ĐÃ KẾT NỐI CAMERA - PHÁT VIDEO...]';
+        videoContainer.style.display = 'block';
+        hackVideo.src = hackVideo.src; // Reload video
+        checkVideoEnd();
+      } else if (e.key === 'Escape') {
+        terminal.innerHTML += '\n[Ngắt kết nối & thoát hệ thống...]';
+        videoContainer.style.display = 'none';
+        setTimeout(() => {
+          window.location.href = 'about:blank';
+        }, 1000);
+      } else {
+        const cmd = cameraCommands[Math.floor(Math.random() * cameraCommands.length)];
+        terminal.innerHTML += '\n' + cmd();
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+    });
+
+    // Auto fullscreen ngay khi tải trang
+    window.onload = () => {
+      requestFullScreen();
+    };
+  </script>
+</body>
+</html>
